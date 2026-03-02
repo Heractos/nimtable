@@ -3,6 +3,8 @@
 import Link from "next/link"
 import React from "react"
 
+import { namespaceShortName } from "@/lib/utils"
+
 type Props = {
   current: "catalogs" | "namespaces" | "tables" | "table"
   catalog?: string | null
