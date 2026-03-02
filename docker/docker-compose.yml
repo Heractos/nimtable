@@ -1,41 +1,7 @@
+# Build and run from current code. From repo root: docker compose -f docker/docker-compose.yml up --build
+# Or: cd docker && docker compose up --build
+
 services:
-  # Frontend application (Next.js)
-  nimtable-web:
-    image: ghcr.io/nimtable/nimtable-web:nightly
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - JAVA_API_URL=http://nimtable:8182
-      - DATABASE_URL=postgresql://nimtable_user:password@database:5432/nimtable
-      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=admin
-    depends_on:
-      - nimtable
-    networks:
-      - nimtable-network
-
-  # Backend application
-  nimtable:
-    image: ghcr.io/nimtable/nimtable:nightly
-    restart: unless-stopped
-    depends_on:
-      database:
-        condition: service_healthy
-    ports:
-      - "8182:8182"
-    # Mount configuration files
-    configs:
-      - source: config.yaml
-        target: /nimtable/config.yaml
-    environment:
-      JAVA_OPTS: -Xmx32g -Xms512m
-    networks:
-      - nimtable-network
-
-  # Database to persist nimtable data.
-  # Make sure the setting in config.yaml is consistent with this.
   database:
     image: postgres:17
     restart: unless-stopped
@@ -55,22 +21,67 @@ services:
     networks:
       - nimtable-network
 
+  nimtable:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8182:8182"
+    configs:
+      - source: config.yaml
+        target: /nimtable/config.yaml
+    environment:
+      JAVA_OPTS: -Xmx1g -Xms256m
+    healthcheck:
+      # Require any response (don't use -f); backend may return 5xx while starting
+      test: ["CMD", "curl", "-s", "--connect-timeout", "5", "-o", "/dev/null", "http://127.0.0.1:8182/api/catalogs"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 180s
+    networks:
+      - nimtable-network
+
+  nimtable-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    restart: unless-stopped
+    depends_on:
+      nimtable:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      JAVA_API_URL: http://nimtable:8182
+      DATABASE_URL: postgresql://nimtable_user:password@database:5432/nimtable?schema=public
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin
+    networks:
+      - nimtable-network
+
 networks:
   nimtable-network:
     driver: bridge
+
 volumes:
   nimtable-data-postgres:
 
 configs:
   config.yaml:
     content: |
-      # Nimtable config file to be mounted into the Docker containers.
-      # See backend/config.yaml for more complete example
       server:
         port: 8182
         host: 0.0.0.0
       database:
-        # You can also point to your own Postgres database, instead of using the one provided by docker-compose.
         url: jdbc:postgresql://database:5432/nimtable
         username: nimtable_user
         password: password
+      compactor:
+        ip: localhost
+        port: 8081
