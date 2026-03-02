@@ -25,6 +25,7 @@ import {
 
 import { OverviewContext } from "./OverviewProvider"
 import { getTableInfo } from "@/lib/client"
+import { namespaceShortName } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
@@ -204,7 +205,7 @@ export function DashboardDataDashboards() {
       list.push({
         key: "stale",
         title: `${stale.length} tables look stale`,
-        detail: `No updates for > 7 days (top: ${stale[0].catalog}.${stale[0].namespace}.${stale[0].table}).`,
+        detail: `No updates for > 7 days (top: ${stale[0].catalog}.${namespaceShortName(stale[0].namespace)}.${stale[0].table}).`,
         tone: "warn",
         href: `/data/tables/table?catalog=${stale[0].catalog}&namespace=${stale[0].namespace}&table=${stale[0].table}`,
         cta: "Inspect table",
@@ -400,7 +401,7 @@ export function DashboardDataDashboards() {
               >
                 <div className="min-w-0">
                   <div className="truncate text-sm text-card-foreground">
-                    {t.catalog}.{t.namespace}.{t.table}
+                    {t.catalog}.{namespaceShortName(t.namespace)}.{t.table}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     delete files: {t.deleteFiles}

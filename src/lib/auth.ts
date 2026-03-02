@@ -37,7 +37,7 @@ function isTokenPayload(payload: unknown): payload is TokenPayload {
 export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || "your-secret-key"
+      process.env.JWT_SECRET || "dev-secret-change-in-production"
     )
     const { payload } = await jwtVerify(token, secret)
 

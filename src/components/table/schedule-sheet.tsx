@@ -17,6 +17,7 @@ import {
   deleteScheduledTask,
   type ScheduledTask,
 } from "@/lib/client"
+import { namespaceShortName } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -383,7 +384,7 @@ export function ScheduleSheet({
             <DialogHeader>
               <DialogTitle>Create Scheduled Task</DialogTitle>
               <DialogDescription>
-                Schedule automated compaction for {catalog}.{namespace}.{table}
+                Schedule automated compaction for {catalog}.{namespaceShortName(namespace)}.{table}
               </DialogDescription>
             </DialogHeader>
 

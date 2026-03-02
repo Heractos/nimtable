@@ -20,7 +20,8 @@ import { getJavaApiBaseUrl } from "./lib/api-config"
 import { jwtVerify } from "jose"
 import { AUTH_COOKIE_NAME } from "./app/acc-api/const"
 
-const JWT_SECRET = process.env.JWT_SECRET || ""
+const JWT_SECRET =
+  process.env.JWT_SECRET || "dev-secret-change-in-production"
 
 // List of paths that don't require authentication
 const PUBLIC_PATHS = ["/acc-api/auth/login", "/acc-api/auth/logout", "/login"]

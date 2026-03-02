@@ -15,6 +15,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { namespaceShortName } from "@/lib/utils"
 
 export function TableWatchlist() {
   const { tables, isFileDistributionLoading } = useContext(OverviewContext)
@@ -120,12 +121,12 @@ export function TableWatchlist() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h3 className="text-sm font-normal text-card-foreground truncate max-w-full">
-                    {table.catalog}.{table.namespace}.{table.table}
+                    {table.catalog}.{namespaceShortName(table.namespace)}.{table.table}
                   </h3>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    {table.catalog}.{table.namespace}.{table.table}
+                    {table.catalog}.{namespaceShortName(table.namespace)}.{table.table}
                   </p>
                 </TooltipContent>
               </Tooltip>

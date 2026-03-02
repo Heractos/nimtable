@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { namespaceShortName } from "@/lib/utils"
 import { SqlEditorNavbar } from "@/components/shared/sql-editor-navbar"
 import { createColumns } from "@/components/query/columns"
 import { DataTable } from "@/components/query/data-table"
@@ -208,7 +209,7 @@ export default function SQLEditorPage() {
             )
             toast({
               title: "Table inserted",
-              description: `${catalog}.${namespace}.${table} added to the editor`,
+              description: `${catalog}.${namespaceShortName(namespace)}.${table} added to the editor`,
             })
           }}
           className="h-full w-full"

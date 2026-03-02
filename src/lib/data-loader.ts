@@ -79,6 +79,11 @@ export interface NamespaceChildren {
   tables: string[]
 }
 
+/** Iceberg REST spec: multipart namespace in path/query must use unit separator (0x1F). */
+function namespaceToApiParam(namespaceName: string): string {
+  return namespaceName.split(".").join("\u001F")
+}
+
 export async function loadNamespacesAndTables(
   catalog: string,
   inBrowser: boolean = true
@@ -98,14 +103,14 @@ export async function loadNamespacesAndTables(
 
     // Root (empty) namespace isn't a real namespace; don't query tables for it.
     const tablesResponse = namespaceName
-      ? await api.v1.listTables(namespaceName)
+      ? await api.v1.listTables(namespaceToApiParam(namespaceName))
       : { identifiers: [] as any[] }
 
-    // Get child namespaces
-    // Important: do NOT send `parent` when it is empty, otherwise Iceberg REST
-    // servers may interpret it as an empty namespace and return 404.
+    // Get child namespaces (parent must use 0x1F separator per Iceberg REST spec)
     const childNamespacesResponse = namespaceName
-      ? await api.v1.listNamespaces({ parent: namespaceName })
+      ? await api.v1.listNamespaces({
+          parent: namespaceToApiParam(namespaceName),
+        })
       : await api.v1.listNamespaces()
     const childNamespaces = childNamespacesResponse.namespaces || []
 
@@ -164,12 +169,14 @@ export async function loadNamespaceChildren(
   const trimmedParent = parentNamespace?.trim()
 
   const namespacePromise = trimmedParent
-    ? api.v1.listNamespaces({ parent: trimmedParent })
+    ? api.v1.listNamespaces({
+        parent: namespaceToApiParam(trimmedParent),
+      })
     : api.v1.listNamespaces()
 
   // Tables exist only under a concrete namespace; root has no tables.
   const tablesPromise = trimmedParent
-    ? api.v1.listTables(trimmedParent)
+    ? api.v1.listTables(namespaceToApiParam(trimmedParent))
     : Promise.resolve({ identifiers: [] as Array<{ name: string }> })
 
   const [namespaceResp, tablesResp] = await Promise.all([
@@ -247,7 +254,7 @@ export async function loadTableData(
   table: string
 ): Promise<LoadTableResult> {
   const api = catalogApi(catalog, isBrowser())
-  const response = await api.v1.loadTable(namespace, table)
+  const response = await api.v1.loadTable(namespaceToApiParam(namespace), table)
   return response
 }
 
@@ -257,7 +264,7 @@ export async function dropTable(
   table: string
 ): Promise<void> {
   const api = catalogApi(catalog)
-  await api.v1.dropTable(namespace, table)
+  await api.v1.dropTable(namespaceToApiParam(namespace), table)
 }
 
 export async function renameTable(
@@ -432,10 +439,11 @@ export async function getNamespaceTables(
   namespace: string
 ): Promise<NamespaceTable[]> {
   const api = catalogApi(catalog)
-  const response = await api.v1.listTables(namespace)
+  const nsParam = namespaceToApiParam(namespace)
+  const response = await api.v1.listTables(nsParam)
   return (await Promise.all(
     response.identifiers?.map(async (table) => {
-      const tableResponse = await api.v1.loadTable(namespace, table.name)
+      const tableResponse = await api.v1.loadTable(nsParam, table.name)
       return {
         name: table.name,
         formatVersion: tableResponse.metadata["format-version"] || "",

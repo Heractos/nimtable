@@ -20,6 +20,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/** Last segment of a namespace path for display (e.g. "a.b.c" → "c"). */
+export function namespaceShortName(namespace: string): string {
+  if (namespace == null || typeof namespace !== "string") return ""
+  const parts = namespace.split(".").filter(Boolean)
+  return parts.length > 0 ? parts[parts.length - 1] : namespace
+}
+
 interface IcebergErrorResponse {
   error: {
     message: string
@@ -59,6 +66,15 @@ export function errorToString(error: unknown): string {
 
     return details ? `${message} (${details})` : message
   }
+  // API response body shape { error: string } (e.g. login 403/500)
+  if (
+    error &&
+    typeof error === "object" &&
+    "error" in error &&
+    typeof (error as { error?: unknown }).error === "string"
+  ) {
+    return (error as { error: string }).error
+  }
   // IcebergErrorResponse
   if (
     error &&
@@ -74,6 +90,20 @@ export function errorToString(error: unknown): string {
   // Error
   if (error instanceof Error) {
     return error.message
+  }
+  // Nested body/data (e.g. some HTTP clients attach parsed body to thrown error)
+  if (error && typeof error === "object") {
+    const body = "body" in error ? (error as { body?: unknown }).body : null
+    const data = "data" in error ? (error as { data?: unknown }).data : null
+    const nested = body ?? data
+    if (
+      nested &&
+      typeof nested === "object" &&
+      "error" in nested &&
+      typeof (nested as { error?: unknown }).error === "string"
+    ) {
+      return (nested as { error: string }).error
+    }
   }
   // Fallback
   return "Unknown error"

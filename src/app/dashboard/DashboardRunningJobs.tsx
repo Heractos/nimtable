@@ -8,6 +8,7 @@ import { CalendarClock, ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getScheduledTasks, type ScheduledTask } from "@/lib/client"
+import { namespaceShortName } from "@/lib/utils"
 import { summarizeScheduledTasks } from "./dashboard-health"
 
 function formatWhen(dateString?: string) {
@@ -101,7 +102,7 @@ export function DashboardRunningJobs() {
                     </Badge>
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground truncate">
-                    {task.catalogName}.{task.namespace}.{task.tableName}
+                    {task.catalogName}.{namespaceShortName(task.namespace)}.{task.tableName}
                   </div>
                 </div>
                 <div className="shrink-0 text-xs text-muted-foreground">

@@ -24,10 +24,16 @@ import {
 } from "@/lib/acc-api/client/sdk.gen"
 import { User } from "@/lib/acc-api/client/types.gen"
 import { useQuery } from "@tanstack/react-query"
+import { errorToString } from "@/lib/utils"
+
+export interface LoginResult {
+  success: boolean
+  errorMessage?: string
+}
 
 interface AuthContextType {
   user: User | undefined
-  login: (username: string, password: string) => Promise<boolean>
+  login: (username: string, password: string) => Promise<LoginResult>
   logout: () => void
   refreshUser: () => Promise<void>
 }
@@ -53,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (
     username: string,
     password: string
-  ): Promise<boolean> => {
+  ): Promise<LoginResult> => {
     try {
       await loginApi({
         body: {
@@ -62,10 +68,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       })
       refetchUserInfo()
-      return true
+      return { success: true }
     } catch (error) {
-      console.error("Login error:", error)
-      return false
+      const message = errorToString(error)
+      console.error("Login error:", message)
+      return { success: false, errorMessage: message }
     }
   }
 

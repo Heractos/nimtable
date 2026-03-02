@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { namespaceShortName } from "@/lib/utils"
 
 export function ActivityFeed() {
   const { tables, isLoading: isLoadingTables } = useContext(OverviewContext)
@@ -206,13 +207,13 @@ export function ActivityFeed() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="text-card-foreground truncate">
-                      {activity?.catalog}.{activity?.namespace}.
+                      {activity?.catalog}.{activity?.namespace != null ? namespaceShortName(activity.namespace) : ""}.
                       {activity?.table}
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>
-                      {activity?.catalog}.{activity?.namespace}.
+                      {activity?.catalog}.{activity?.namespace != null ? namespaceShortName(activity.namespace) : ""}.
                       {activity?.table}
                     </p>
                   </TooltipContent>

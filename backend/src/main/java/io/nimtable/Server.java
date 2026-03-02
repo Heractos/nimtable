@@ -219,6 +219,11 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
+        // Default AWS region when not set (required by AWS SDK / Iceberg S3FileIO for query execution)
+        if (System.getenv("AWS_REGION") == null && System.getProperty("aws.region") == null) {
+            System.setProperty("aws.region", "eu-north-1");
+        }
+
         // Read and parse the config.yaml file
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Config config = mapper.readValue(new File("config.yaml"), Config.class);

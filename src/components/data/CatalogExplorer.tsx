@@ -15,7 +15,7 @@ import Link from "next/link"
 
 import { useCatalogs } from "@/app/data/hooks/useCatalogs"
 import { useNamespaceChildren } from "@/app/data/hooks/useNamespaceChildren"
-import { cn } from "@/lib/utils"
+import { cn, namespaceShortName } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
 type TreeMode = "navigate" | "select"
@@ -114,28 +114,19 @@ function NamespaceNode({
             activeNamespace === namespace && "font-semibold text-foreground"
           )}
         >
-          {namespace || "(root)"}
+          {namespace ? namespaceShortName(namespace) : "(root)"}
         </span>
       </button>
 
       {isOpen && (
         <div className="space-y-0.5">
-          {(data?.namespaces || []).map((child) => (
-            <NamespaceNode
-              key={child.name}
-              catalog={catalog}
-              namespace={child.name}
-              depth={depth + 1}
-              mode={mode}
-              onSelectTable={onSelectTable}
-              activeNamespace={activeNamespace}
-              activeTable={activeTable}
-            />
-          ))}
-
+          {/* Tables at this level first, then child namespaces */}
           {namespace &&
             (data?.tables || []).map((table) => (
-              <div key={`${namespace}.${table}`} className="pl-[52px]">
+              <div
+                key={`table-${namespace}.${table}`}
+                style={{ paddingLeft: indent + 44 }}
+              >
                 {mode === "select" && onSelectTable ? (
                   <button
                     type="button"
@@ -158,7 +149,7 @@ function NamespaceNode({
                       namespace
                     )}&table=${encodeURIComponent(table)}`}
                     className={cn(
-                      "flex items-center gap-2 rounded px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+                      "flex w-full items-center gap-2 rounded px-2 py-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
                       activeNamespace === namespace &&
                         activeTable === table &&
                         "bg-muted/70 text-foreground font-medium"
@@ -170,6 +161,19 @@ function NamespaceNode({
                 )}
               </div>
             ))}
+
+          {(data?.namespaces || []).map((child) => (
+            <NamespaceNode
+              key={child.name}
+              catalog={catalog}
+              namespace={child.name}
+              depth={depth + 1}
+              mode={mode}
+              onSelectTable={onSelectTable}
+              activeNamespace={activeNamespace}
+              activeTable={activeTable}
+            />
+          ))}
         </div>
       )}
     </div>

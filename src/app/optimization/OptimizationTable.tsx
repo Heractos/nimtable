@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
+
+import { namespaceShortName } from "@/lib/utils"
 type Table = {
   id: string
   name: string
@@ -197,7 +199,7 @@ export function OptimizationTable({ tables, loading }: OptimizationTableProps) {
                     {table.name}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {table.catalog}.{table.namespace}
+                    {table.catalog}.{namespaceShortName(table.namespace)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

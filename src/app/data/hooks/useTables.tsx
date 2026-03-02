@@ -1,4 +1,7 @@
-import { DistributionItem, getFileDistribution } from "@/lib/data-loader"
+import {
+  DistributionItem,
+  getFileDistribution,
+} from "@/lib/data-loader"
 import { useQueries } from "@tanstack/react-query"
 import { useNamespaces } from "./useNamespaces"
 import { useCatalogs } from "./useCatalogs"
@@ -20,6 +23,25 @@ export interface Table {
   positionDeleteFileRecordCount: number
   eqDeleteFileRecordCount: number
 }
+
+const emptyDistribution = (ident: {
+  catalog: string
+  namespace: string
+  table: string
+}): Table => ({
+  ...ident,
+  ranges: {},
+  dataFileCount: 0,
+  positionDeleteFileCount: 0,
+  eqDeleteFileCount: 0,
+  dataFileSizeInBytes: 0,
+  positionDeleteFileSizeInBytes: 0,
+  eqDeleteFileSizeInBytes: 0,
+  dataFileRecordCount: 0,
+  positionDeleteFileRecordCount: 0,
+  eqDeleteFileRecordCount: 0,
+})
+
 export const useAllTables = () => {
   const {
     catalogs,
@@ -49,24 +71,24 @@ export const useAllTables = () => {
               table.catalog,
               table.namespace,
               table.table
-            ).then((data) => {
-              return {
-                ...data,
-                table: table.table,
-                catalog: table.catalog,
-                namespace: table.namespace,
-              }
-            }),
+            ).then((data) => ({
+              ...data,
+              table: table.table,
+              catalog: table.catalog,
+              namespace: table.namespace,
+            })),
           enabled: !!table.catalog && !!table.namespace && !!table.table,
         }
       }) || [],
   })
 
-  const tables = tablesQueries
-    .map((query) => {
-      return query.data
-    })
-    .filter((table) => table !== undefined)
+  // Always show every table from namespaces; merge in distribution when loaded (or use empty when still loading/failed)
+  const tables = tablesNames.map((ident, index) => {
+    const data = tablesQueries[index]?.data
+    return data
+      ? { ...emptyDistribution(ident), ...data }
+      : emptyDistribution(ident)
+  })
 
   return {
     tables,

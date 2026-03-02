@@ -354,9 +354,11 @@ public class RESTCatalogAdapter extends BaseHTTPClient {
                                         asNamespaceCatalog, ns, pageToken, pageSize));
                     } else {
                         if (ns != null && ns.length() > 0) {
-                            // only support one level of namespace listing
                             return castResponse(
-                                    responseType, ListNamespacesResponse.builder().build());
+                                    responseType,
+                                    ListNamespacesResponse.builder()
+                                            .addAll(asNamespaceCatalog.listNamespaces(ns))
+                                            .build());
                         } else {
                             return castResponse(
                                     responseType,

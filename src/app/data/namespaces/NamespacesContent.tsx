@@ -184,7 +184,7 @@ export function NamespacesContent() {
                   }}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-normal text-card-foreground">
-                    {namespace.name}
+                    {namespace.shortName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {namespace.catalog}

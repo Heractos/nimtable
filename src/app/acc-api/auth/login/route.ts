@@ -21,9 +21,11 @@ import { db } from "@/lib/db"
 import { LoginResponse } from "@/lib/acc-api/client/types.gen"
 import { AUTH_COOKIE_NAME } from "../../const"
 
-const JWT_SECRET = process.env.JWT_SECRET || ""
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || ""
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ""
+// Defaults so admin/admin works out of the box (e.g. when .env is not set)
+const JWT_SECRET =
+  process.env.JWT_SECRET || "dev-secret-change-in-production"
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin"
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin"
 
 export async function POST(request: NextRequest) {
   try {
@@ -129,8 +131,6 @@ export async function POST(request: NextRequest) {
         { expiresIn: "24h" }
       )
 
-      console.log("JWT_SECRET", JWT_SECRET)
-
       const response = NextResponse.json<LoginResponse>({
         success: true,
         token: token,
@@ -151,9 +151,34 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Login error details:", error)
-    return NextResponse.json(
-      { error: "An error occurred during login" },
-      { status: 500 }
-    )
+
+    const message = getLoginErrorMessage(error)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
+}
+
+function getLoginErrorMessage(error: unknown): string {
+  if (!error || typeof error !== "object") {
+    return "An error occurred during login"
+  }
+  const msg =
+    "message" in error && typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message
+      : ""
+  const code =
+    "code" in error && typeof (error as { code?: unknown }).code === "string"
+      ? (error as { code: string }).code
+      : ""
+
+  if (code === "P1001" || msg.includes("Connection refused") || msg.includes("ECONNREFUSED")) {
+    return "Database connection failed. Ensure DATABASE_URL is set in .env and Postgres is running."
+  }
+  if (code === "P1003" || msg.includes("does not exist")) {
+    return "Database not found. Ensure the database in DATABASE_URL exists and migrations have run."
+  }
+  if (code?.startsWith("P1") || msg.includes("Prisma")) {
+    return "Database error. Check DATABASE_URL and that the database schema is initialized."
+  }
+
+  return "An error occurred during login"
 }

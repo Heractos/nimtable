@@ -22,6 +22,7 @@ import { useNamespaces } from "../hooks/useNamespaces"
 import { useCatalogs } from "../hooks/useCatalogs"
 import { useAllTables } from "../hooks/useTables"
 import { DataHierarchyHeader } from "@/components/data/DataHierarchyHeader"
+import { namespaceShortName } from "@/lib/utils"
 
 export function TablesContent() {
   const { catalogs } = useCatalogs()
@@ -195,7 +196,7 @@ export function TablesContent() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 bg-card border-input">
                 <FolderIcon className="w-4 h-4" />
-                {selectedNamespace}
+                {selectedNamespace === "all" ? "All Namespaces" : selectedNamespace}
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -280,7 +281,7 @@ export function TablesContent() {
                         {table.table}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                        {table.namespace}
+                        {namespaceShortName(table.namespace)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {table.status === "needs_compaction" ? (

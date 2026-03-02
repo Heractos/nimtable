@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/tooltip"
 import { OptimizeSheet } from "@/components/table/optimize-sheet"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, namespaceShortName } from "@/lib/utils"
 import { useState } from "react"
 import Link from "next/link"
 
@@ -91,7 +91,7 @@ export function TopNavbar({ catalog, namespace, table }: TopNavbarProps) {
                     )}
                   >
                     <FolderTree className="h-3.5 w-3.5 text-blue-500" />
-                    {namespace}
+                    {namespace ? namespaceShortName(namespace) : ""}
                   </Link>
                 </>
               )}

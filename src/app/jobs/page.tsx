@@ -25,6 +25,7 @@ import {
   toggleScheduledTask,
   type ScheduledTask,
 } from "@/lib/client"
+import { namespaceShortName } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -366,7 +367,7 @@ export default function JobsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-card-foreground">
-                            {task.catalogName}.{task.namespace}.{task.tableName}
+                            {task.catalogName}.{namespaceShortName(task.namespace)}.{task.tableName}
                           </div>
                           <Link
                             href={`/data/tables/table?catalog=${task.catalogName}&namespace=${task.namespace}&table=${task.tableName}`}

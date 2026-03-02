@@ -61,8 +61,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { errorToString } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { cn, errorToString, namespaceShortName } from "@/lib/utils"
 import { actionGenerateTableSummary } from "@/components/table/actions"
 import { type TableSummary as TableSummaryType } from "@/db/db"
 import { AITextInput } from "@/components/ai-text-input"
@@ -157,7 +156,7 @@ export function InfoTab({
       await dropTable(catalog, namespace, table)
       toast({
         title: "Table dropped successfully",
-        description: `Table ${table} has been dropped from namespace ${namespace}`,
+        description: `Table ${table} has been dropped from namespace ${namespaceShortName(namespace)}`,
       })
       refresh()
       router.push(`/${catalog}/${namespace}`)

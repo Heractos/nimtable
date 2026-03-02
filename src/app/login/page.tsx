@@ -44,15 +44,16 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const success = await login(username, password)
-      if (success) {
+      const result = await login(username, password)
+      if (result.success) {
         toast({
           title: "Login successful",
           description: "Welcome back to Nimtable",
         })
         router.push(redirectPath)
       } else {
-        const errorMessage = "Invalid username or password"
+        const errorMessage =
+          result.errorMessage || "Invalid username or password"
         setError(errorMessage)
         toast({
           title: "Login failed",
@@ -71,14 +72,15 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
-      const errorMessage = "An error occurred during login"
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during login"
       setError(errorMessage)
       toast({
         title: "Login error",
         description: errorMessage,
         variant: "destructive",
       })
-      console.error(err)
+      console.error("Login error:", err)
     }
   }
 
