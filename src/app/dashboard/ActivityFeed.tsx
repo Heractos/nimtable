@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useQueries } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { getTableInfo } from "@/lib/client"
+import { namespaceToApiParam } from "@/lib/data-loader"
 import { useContext, useMemo, useState } from "react"
 import {
   Tooltip,
@@ -43,7 +44,7 @@ export function ActivityFeed() {
         return getTableInfo({
           path: {
             catalog: table.catalog,
-            namespace: table.namespace,
+            namespace: namespaceToApiParam(table.namespace),
             table: table.table,
           },
         }).then((res) => {

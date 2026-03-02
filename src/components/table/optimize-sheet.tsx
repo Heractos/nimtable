@@ -30,6 +30,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import {
+  namespaceToApiParam,
   runOptimizationOperation,
   type OptimizationOperation,
 } from "@/lib/data-loader"
@@ -117,7 +118,7 @@ function CompactionHistory({
       getTableInfo({
         path: {
           catalog,
-          namespace,
+          namespace: namespaceToApiParam(namespace),
           table,
         },
       }).then((res) => res.data),

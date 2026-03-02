@@ -35,9 +35,6 @@ export async function GET(req: Request) {
     tableName: table,
   })
 
-  if (!tableSummary) {
-    return Response.json({ error: "Table summary not found" }, { status: 404 })
-  }
-
-  return Response.json(tableSummary, { status: 200 })
+  // Return 200 with null when no summary exists (e.g. not generated yet) so the UI doesn't show 404
+  return Response.json(tableSummary ?? null, { status: 200 })
 }

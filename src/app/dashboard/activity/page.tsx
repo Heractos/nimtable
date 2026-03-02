@@ -9,6 +9,7 @@ import { useQueries } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { getTableInfo } from "@/lib/client"
+import { namespaceToApiParam } from "@/lib/data-loader"
 import { formatDate } from "@/lib/format"
 
 export default function ActivityPage() {
@@ -28,7 +29,7 @@ export default function ActivityPage() {
         return getTableInfo({
           path: {
             catalog: table.catalog,
-            namespace: table.namespace,
+            namespace: namespaceToApiParam(table.namespace),
             table: table.table,
           },
         }).then((res) => {

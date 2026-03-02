@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.iceberg.*;
 import org.apache.iceberg.catalog.Catalog;
+import org.apache.iceberg.catalog.Namespace;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.io.FileIO;
 import org.slf4j.Logger;
@@ -163,7 +164,21 @@ public class DistributionServlet extends HttpServlet {
             }
         }
 
-        Table table = catalog.loadTable(TableIdentifier.of(namespace, tableName));
+        // Namespace in path may be dotted (e.g. "a.b" or "a.b.c"); Iceberg expects multi-level Namespace
+        Table table;
+        try {
+            Namespace ns = Namespace.of(namespace.split("\\."));
+            table = catalog.loadTable(TableIdentifier.of(ns, tableName));
+        } catch (Exception e1) {
+            // Fallback: some catalogs store nested namespace as single level "a.b"
+            LOG.debug("Multi-level namespace failed, trying single-level: {}", e1.getMessage());
+            try {
+                table = catalog.loadTable(TableIdentifier.of(namespace, tableName));
+            } catch (Exception e2) {
+                LOG.warn("Both multi-level and single-level load failed for {}.{}", namespace, tableName, e2);
+                throw e2;
+            }
+        }
 
         Snapshot snapshot;
         if (snapshotId != null) {

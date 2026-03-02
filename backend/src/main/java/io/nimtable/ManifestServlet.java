@@ -34,6 +34,7 @@ import org.apache.iceberg.DeleteFile;
 import org.apache.iceberg.ManifestFile;
 import org.apache.iceberg.ManifestFiles;
 import org.apache.iceberg.Table;
+import org.apache.iceberg.catalog.Namespace;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.io.FileIO;
 import org.apache.iceberg.transforms.Transforms;
@@ -94,12 +95,13 @@ public class ManifestServlet extends HttpServlet {
             properties.put("uri", dbCatalog.getUri());
         }
 
-        // Load table
+        // Load table (namespace in path may be dotted e.g. "a.b"; use multi-level Namespace)
         Table table;
         try {
+            Namespace ns = Namespace.of(namespace.split("\\."));
             table =
                     CatalogUtil.buildIcebergCatalog(catalogName, properties, new Configuration())
-                            .loadTable(TableIdentifier.of(namespace, tableName));
+                            .loadTable(TableIdentifier.of(ns, tableName));
         } catch (Exception e) {
             logger.error("Failed to load table: {}.{}", namespace, tableName, e);
             response.sendError(

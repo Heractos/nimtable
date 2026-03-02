@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.iceberg.*;
+import org.apache.iceberg.catalog.Namespace;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -219,12 +220,13 @@ public class OptimizeServlet extends HttpServlet {
             properties.put("uri", dbCatalog.getUri());
         }
 
-        // Load table
+        // Load table (namespace in path may be dotted e.g. "a.b"; use multi-level Namespace)
         Table table;
         try {
+            Namespace ns = Namespace.of(namespace.split("\\."));
             table =
                     CatalogUtil.buildIcebergCatalog(catalogName, properties, new Configuration())
-                            .loadTable(TableIdentifier.of(namespace, tableName));
+                            .loadTable(TableIdentifier.of(ns, tableName));
         } catch (Exception e) {
             logger.error("Failed to load table: {}.{}", namespace, tableName, e);
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);

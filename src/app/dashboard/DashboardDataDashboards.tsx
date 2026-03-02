@@ -25,6 +25,7 @@ import {
 
 import { OverviewContext } from "./OverviewProvider"
 import { getTableInfo } from "@/lib/client"
+import { namespaceToApiParam } from "@/lib/data-loader"
 import { namespaceShortName } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -86,7 +87,7 @@ export function DashboardDataDashboards() {
         const res = await getTableInfo({
           path: {
             catalog: table.catalog,
-            namespace: table.namespace,
+            namespace: namespaceToApiParam(table.namespace),
             table: table.table,
           },
         })

@@ -1,13 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  // rewrites is only for development (pnpm run dev); it won't affect static export
-  rewrites: () => [
-    {
-      source: "/api/:path*",
-      destination: "http://localhost:8182/api/:path*",
-    },
-  ],
+  // Only proxy known backend paths to Java; /api/agent/* and other /api/* stay on Next.js
+  rewrites: () => {
+    const base =
+      process.env.JAVA_API_URL || "http://localhost:8182"
+    const api = base.replace(/\/$/, "") + "/api"
+    return [
+      { source: "/api/catalogs", destination: `${api}/catalogs` },
+      { source: "/api/catalogs/:path*", destination: `${api}/catalogs/:path*` },
+      { source: "/api/config/:path*", destination: `${api}/config/:path*` },
+      { source: "/api/query", destination: `${api}/query` },
+      { source: "/api/manifest/:path*", destination: `${api}/manifest/:path*` },
+      { source: "/api/optimize/:path*", destination: `${api}/optimize/:path*` },
+      { source: "/api/distribution/:path*", destination: `${api}/distribution/:path*` },
+      { source: "/api/catalog/:catalog/:path*", destination: `${api}/catalog/:catalog/:path*` },
+    ]
+  },
   async redirects() {
     return [
       {

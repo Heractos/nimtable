@@ -80,7 +80,7 @@ export interface NamespaceChildren {
 }
 
 /** Iceberg REST spec: multipart namespace in path/query must use unit separator (0x1F). */
-function namespaceToApiParam(namespaceName: string): string {
+export function namespaceToApiParam(namespaceName: string): string {
   return namespaceName.split(".").join("\u001F")
 }
 
