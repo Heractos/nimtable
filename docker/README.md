@@ -23,6 +23,8 @@ docker compose up --build
 
 Then open http://localhost:3000 (login: admin / admin).
 
+**Backend config:** The backend uses your `backend/config.yaml` (mounted into the container). Put your catalog definitions (e.g. `polaris` with `type: rest`, `uri`, etc.) there; they will be used for REST and Spark. The database URL is overridden in Docker via `DATABASE_URL` so the same file works locally (e.g. `localhost:5432`) and in Docker (`database:5432`).
+
 **If the backend (nimtable) is unhealthy and the web never starts**, check why it’s failing:
 ```bash
 docker compose logs nimtable

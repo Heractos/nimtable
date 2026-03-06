@@ -31,11 +31,13 @@ services:
         condition: service_healthy
     ports:
       - "8182:8182"
-    configs:
-      - source: config.yaml
-        target: /nimtable/config.yaml
+    volumes:
+      # Use your backend config.yaml so catalogs (e.g. polaris) from config are used
+      - ../backend/config.yaml:/nimtable/config.yaml:ro
     environment:
       JAVA_OPTS: -Xmx1g -Xms256m
+      # Override DB URL for Docker (config.yaml can keep localhost for local runs)
+      DATABASE_URL: jdbc:postgresql://database:5432/nimtable
     healthcheck:
       # Require any response (don't use -f); backend may return 5xx while starting
       test: ["CMD", "curl", "-s", "--connect-timeout", "5", "-o", "/dev/null", "http://127.0.0.1:8182/api/catalogs"]
@@ -71,17 +73,3 @@ networks:
 
 volumes:
   nimtable-data-postgres:
-
-configs:
-  config.yaml:
-    content: |
-      server:
-        port: 8182
-        host: 0.0.0.0
-      database:
-        url: jdbc:postgresql://database:5432/nimtable
-        username: nimtable_user
-        password: password
-      compactor:
-        ip: localhost
-        port: 8081

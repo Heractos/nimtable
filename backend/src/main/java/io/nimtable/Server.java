@@ -224,9 +224,27 @@ public class Server {
             System.setProperty("aws.region", "eu-north-1");
         }
 
-        // Read and parse the config.yaml file
+        // Read config: CONFIG_FILE env or default config.yaml (so Docker can mount your file)
+        String configPath = System.getenv("CONFIG_FILE");
+        if (configPath == null || configPath.isEmpty()) {
+            configPath = "config.yaml";
+        }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Config config = mapper.readValue(new File("config.yaml"), Config.class);
+        Config config = mapper.readValue(new File(configPath), Config.class);
+
+        // Override database from env when running in Docker (e.g. DATABASE_URL=jdbc:postgresql://database:5432/nimtable)
+        String dbUrl = System.getenv("DATABASE_URL");
+        if (dbUrl != null && !dbUrl.isEmpty()) {
+            config =
+                    new Config(
+                            config.server(),
+                            new Config.Database(
+                                    dbUrl,
+                                    config.database().username(),
+                                    config.database().password()),
+                            config.catalogs(),
+                            config.compactor());
+        }
         Config.Database dbConfig = config.database(); // Get DB config early
 
         // Initialize Persistence Manager
